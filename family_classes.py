@@ -39,6 +39,20 @@ class FamilyTree:
             self.nodes.pop(node.id)
             node.name = None
             node.id = -1
+    
+    def rename_node(self, node, new_name):
+        if node.id not in self.nodes:
+            return
+        old_node = node
+        old_id = node.id
+        node.name = node.reshape(new_name)
+        if node.father:
+            [node if child == old_node else child for child in node.father.children]
+        if node.children:
+            for child in node.children:
+                child.father = node
+        self.nodes.pop(old_id)
+        self.nodes[node.id] = node
 
     def print_tree(self):
         lines = []
@@ -57,10 +71,13 @@ class FamilyTree:
 
 class Node:
     def __init__(self, name):
-        self.name = arabic_reshaper.reshape(name)[::-1] if name else None
+        self.name = self.reshape(name)
         self.father = None
         self.children = []
-        self.id = sum(ord(char) for char in self.get_fullname()) if name else -1
+
+    @property
+    def id(self):
+        return sum(ord(char) for char in self.get_fullname()) if self.name else -1
 
     def add_children(self, children):
         for child in children:
@@ -82,6 +99,9 @@ class Node:
             full_name = current.name + " " + full_name
             current = current.father
         return full_name
+    
+    def reshape(self, name):
+        return arabic_reshaper.reshape(name)[::-1] if name else None
 
 
 
@@ -95,7 +115,6 @@ testtree.add_node(testnode)
 s2 = Node("عزيز")
 testnode.add_children(["عزيز"])
 
-
+testtree.rename_node(testnode, "عائض")
 print(testtree.print_tree())
 
-print(Node(None).name)
